@@ -15,14 +15,21 @@
   --muted:#94a3b8;--done:#64748b;--accent:#e5e7eb;
 }
 *{box-sizing:border-box}
+
+/* Top-aligned layout */
 body{
-  margin:0;min-height:100vh;display:flex;
-  align-items:center;justify-content:center;
-  background:var(--bg);color:var(--text);
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:flex-start;
+  align-items:stretch;
+  padding:16px;
+  background:var(--bg);
+  color:var(--text);
   font-family:system-ui,Segoe UI,Roboto,sans-serif;
 }
 
-/* ===== Splash ===== */
+/* Splash */
 #splash{
   position:fixed;inset:0;
   background:var(--bg);
@@ -42,15 +49,18 @@ body{
 .splash-title{font-size:22px;font-weight:600}
 .splash-sub{font-size:13px;color:var(--muted);margin-top:4px}
 
-/* ===== Card ===== */
+/* Card */
 .card{
-  width:min(520px,92vw);
+  width:100%;
+  max-width:520px;
+  margin:0 auto;
   background:var(--card);
-  padding:20px;border-radius:16px;
+  padding:20px;
+  border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,.15);
 }
 
-/* ===== Header ===== */
+/* Header */
 .header{
   display:flex;justify-content:space-between;
   align-items:center;margin-bottom:14px;
@@ -65,7 +75,7 @@ body{
 .title-wrap h1{margin:0;font-size:18px}
 .subtitle{font-size:12px;color:var(--muted)}
 
-/* ===== Theme Toggle (Screenshot Style) ===== */
+/* Theme toggle (pill style) */
 .theme-toggle{
   width:56px;height:30px;
   border-radius:999px;
@@ -87,7 +97,7 @@ body{
   transform:translateX(26px);
 }
 
-/* ===== App ===== */
+/* App */
 .row{display:flex;gap:8px;align-items:center}
 input{
   flex:1;padding:10px;border-radius:8px;
@@ -116,7 +126,7 @@ footer{
   font-size:12px;color:var(--muted);margin-top:10px
 }
 
-/* ===== Confirm Dialog ===== */
+/* Confirm dialog */
 .modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,.55);
@@ -171,8 +181,7 @@ footer{
       </div>
     </div>
 
-    <!-- Toggle -->
-    <div id="themeBtn" class="theme-toggle" aria-label="Toggle theme">
+    <div id="themeBtn" class="theme-toggle">
       <div class="sun">☀</div>
     </div>
   </div>
@@ -211,13 +220,11 @@ let tasks=JSON.parse(localStorage.getItem(KEY)||'[]');
 
 /* Theme */
 const themeBtn=document.getElementById('themeBtn');
-const savedTheme=localStorage.getItem('theme')||'light';
-document.documentElement.dataset.theme=savedTheme;
-
+document.documentElement.dataset.theme=localStorage.getItem('theme')||'light';
 themeBtn.onclick=()=>{
-  const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
-  document.documentElement.dataset.theme=next;
-  localStorage.setItem('theme',next);
+  const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  document.documentElement.dataset.theme=t;
+  localStorage.setItem('theme',t);
 };
 
 /* Haptic */
@@ -251,18 +258,30 @@ const list=document.getElementById('list');
 const input=document.getElementById('input');
 const count=document.getElementById('count');
 
-function save(){localStorage.setItem(KEY,JSON.stringify(tasks));render()}
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(tasks));
+  render();
+}
+
 function add(){
   if(!input.value.trim())return;
   tasks.unshift({id:crypto.randomUUID(),text:input.value,done:false});
-  input.value='';save();input.focus();
+  input.value='';
+  save();
+  input.focus();
 }
+
 input.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){e.preventDefault();add();}
+  if(e.key==='Enter'){
+    e.preventDefault();
+    add();
+  }
 });
+
 async function confirmClear(){
   if(await confirmBox('Clear all completed tasks?')){
-    tasks=tasks.filter(t=>!t.done);save();
+    tasks=tasks.filter(t=>!t.done);
+    save();
   }
 }
 
@@ -290,7 +309,8 @@ function render(){
   list.innerHTML='';
   tasks.forEach((t,i)=>{
     const li=document.createElement('li');
-    li.dataset.id=t.id;li.draggable=true;
+    li.dataset.id=t.id;
+    li.draggable=true;
     li.innerHTML=`
       <div class="chk">${t.done?'✓':''}</div>
       <div class="${t.done?'done':''}" style="flex:1">${t.text}</div>
@@ -298,7 +318,8 @@ function render(){
     li.onclick=async e=>{
       if(e.target.tagName==='BUTTON'){
         if(await confirmBox('Delete this task?')){
-          tasks.splice(i,1);save();
+          tasks.splice(i,1);
+          save();
         }
       }else{
         t.done=!t.done;
